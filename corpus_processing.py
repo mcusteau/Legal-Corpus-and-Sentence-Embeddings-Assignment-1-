@@ -25,14 +25,17 @@ def tokenise(doc):
 	
 	#reg = '''[\.'](?=[\s\t])|[\[\("\]\)\:\?\!\:]|(?<=[\s\t])[']'''
 
-	find_abbreviations = r'''(?<=[\s\t])[A-Z][\.a-zA-Z]*\.(?=[\s\t])''' # finds abbreviations like "St." and "P.H.D."
+	find_abbreviations = r'''(?<=[\s\t])[A-Z][\.a-zA-Z]*\.(?=[\s\t])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
 
-	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like "i.e." or "10.19"
+	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
 
 	find_numbers_with_commas = r'''\d+,[\d,\.]+''' # finds numbers with commas like "1,000,000.12"
 
-	find_contractions_and_possesive = r'''[a-zA-Z]+'[a-zA-Z]+''' # finds contractions like "don't" and possesive words like "supplier's"
+	find_contractions_and_possesive = r'''[a-zA-Z]+'[a-zA-Z]+''' # finds contractions like "don't" and possesive words like "supplier's"    
 
+	#find_plurial_possisive = r'''(?<=[\s\t])[^\'][a-zA-Z]+\'(?=[\s\t])''' # finds contractions like James' but looking for words that end however this is probematic
+
+	# dictionary of special words that we dont want edited during tokenization
 	special_case_dict = {}
 
 	abbreviations = re.findall(find_abbreviations, doc)
@@ -55,14 +58,18 @@ def tokenise(doc):
 	for con in contractions:
 		special_case_dict[con] = [{ORTH: con}]
 
-	prefix_regex = re.compile(r'''^[\[\("']''')
+	# Note that these next regex expressions will not impact our special words we added to dictioanry
 
-	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"']''')
+	prefix_regex = re.compile(r'''^[\[\("']''') # seperates words from punctuation marks: [ ( " '     
 
-	http_catcher = re.compile(r'''https:[^\s\t]+''')
+	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"']''') # seperates words from punctuation marks: ] ) : ? ! . " , '     
 
+	http_catcher = re.compile(r'''https:[^\s\t]+''') # catches URLs that start with https:
+
+	# build our tokenizer
 	tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, suffix_search=suffix_regex.search, url_match=http_catcher.search)
 
+	# tokenize document
 	doc = tokenizer(doc)
 
 	tokens = [token.text for token in doc]
@@ -72,4 +79,4 @@ def tokenise(doc):
 
 tokens = tokenise(file_string)
 
-#print(tokens)
+print(tokens)
