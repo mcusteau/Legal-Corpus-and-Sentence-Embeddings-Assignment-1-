@@ -29,17 +29,24 @@ def tokenise(doc):
 
 	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like i.e. or 10.19
 
-	abbreviations_dict = {}
+	find_dates = r'''\d+\/\d+\/\d+''' # finds dates in the format day/month/year or month/day/year
+
+	special_case_dict = {}
 
 	abbreviations = re.findall(find_abbreviations, doc)
 	print(abbreviations)
 	for abb in abbreviations:
-		abbreviations_dict[abb] = [{ORTH: abb}]
+		special_case_dict[abb] = [{ORTH: abb}]
 
 	abbreviations2 = re.findall(find_abbreviations2, doc)
 	print(abbreviations2)
 	for abb in abbreviations2:
-		abbreviations_dict[abb] = [{ORTH: abb}]
+		special_case_dict[abb] = [{ORTH: abb}]
+
+	dates = re.findall(find_dates,doc)
+	print(dates)
+	for date in dates:
+		special_case_dict[date] = [{ORTH: date}]
 
 	prefix_regex = re.compile(r'''^[\[\("']''')
 
@@ -47,7 +54,7 @@ def tokenise(doc):
 
 	http_catcher = re.compile(r'''https:[^\s\t]+''')
 
-	tokenizer = Tokenizer(nlp.vocab, rules = abbreviations_dict, prefix_search = prefix_regex.search, suffix_search=suffix_regex.search, url_match=http_catcher.search)
+	tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, suffix_search=suffix_regex.search, url_match=http_catcher.search)
 
 	doc = tokenizer(doc)
 
