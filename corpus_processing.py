@@ -27,9 +27,11 @@ def tokenise(doc):
 
 	find_abbreviations = r'''(?<=[\s\t])[A-Z][\.a-zA-Z]*\.(?=[\s\t])''' # finds abbreviations like "St." and "P.H.D."
 
-	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like i.e. or 10.19
+	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like "i.e." or "10.19"
 
-	# find_dates = r'''\d+\/\d+\/\d+''' # finds dates in the format day/month/year or month/day/year. This is currently useless and slows down the code
+	find_numbers_with_commas = r'''\d+,[\d,\.]+''' # finds numbers with commas like "1,000,000.12"
+
+	find_contractions_and_possesive = r'''[a-zA-Z]+'[a-zA-Z]+''' # finds contractions like "don't" and possesive words like "supplier's"
 
 	special_case_dict = {}
 
@@ -43,14 +45,19 @@ def tokenise(doc):
 	for abb in abbreviations2:
 		special_case_dict[abb] = [{ORTH: abb}]
 
-	dates = re.findall(find_dates,doc)
-	print(dates)
-	for date in dates:
-		special_case_dict[date] = [{ORTH: date}]
+	comma_numbers = re.findall(find_numbers_with_commas, doc)
+	print(comma_numbers)
+	for num in comma_numbers:
+		special_case_dict[num] = [{ORTH: num}]
+
+	contractions = re.findall(find_contractions_and_possesive, doc)
+	print(contractions)
+	for con in contractions:
+		special_case_dict[con] = [{ORTH: con}]
 
 	prefix_regex = re.compile(r'''^[\[\("']''')
 
-	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\."']''')
+	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"']''')
 
 	http_catcher = re.compile(r'''https:[^\s\t]+''')
 
