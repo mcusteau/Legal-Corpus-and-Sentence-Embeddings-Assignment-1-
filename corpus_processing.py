@@ -27,7 +27,7 @@ def tokenise(doc):
 
 	find_abbreviations = r'''(?<=[\s\t])[A-Z][\.a-zA-Z]*\.(?=[\s\t])''' # finds abbreviations like "St." and "P.H.D"
 
-	find_abbreviations2 = r'''(?<=[\s\t])[a-z\d]+\.[a-z\.\d]+(?=[\s\t])''' #finds abbreviations like i.e. or 10.19
+	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like i.e. or 10.19
 
 	abbreviations_dict = {}
 
