@@ -29,7 +29,7 @@ def tokenise(doc):
 
 	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like i.e. or 10.19
 
-	find_dates = r'''\d+\/\d+\/\d+''' # finds dates in the format day/month/year or month/day/year
+	# find_dates = r'''\d+\/\d+\/\d+''' # finds dates in the format day/month/year or month/day/year. This is currently useless and slows down the code
 
 	special_case_dict = {}
 
