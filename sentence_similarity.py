@@ -2,8 +2,13 @@ import spacy
 import os
 import torch
 import subprocess
+import numpy as np
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer, util
+from nltk.tokenize import word_tokenize
+from gensim.models import Word2Vec, Doc2Vec
+from gensim.models.doc2vec import TaggedDocument
+
 
 
 
@@ -74,8 +79,46 @@ def SentTransformer(sentences, model_name, datasets):
 				f.write(sim)
 				f.write("\n")
 
+def d2v_initial_load(sentences, dataset):
+	# parse through our 5 datasets of sentence pairs
+	vocab_data = []
+	tagged_data = []
+	for dataset_num in range(len(datasets)):
+		similarity_scores = []
+		print("Processing:", datasets[dataset_num])
+		# prase through each sentence pair of dataset
+		for i in tqdm(range(len(sentences[dataset_num]))):
+			vocab_data = vocab_data+[sentences[dataset_num][i][0], sentences[dataset_num][i][1]]
+
+		tagged_data += [TaggedDocument(words=word_tokenize(_d.lower()), tags=[datasets[dataset_num]+"_"+str(i)]) for i, _d in enumerate(vocab_data)]
+	
+	d2v = Doc2Vec(vector_size=100,alpha=0.025, min_count=1)
+	d2v.build_vocab(tagged_data)
+
+	for epoch in tqdm(range(100)):
+		d2v.train(tagged_data,
+                total_examples=d2v.corpus_count,
+                epochs=d2v.epochs)
+    
+
+	return d2v
+
+def D2V(d2v, sentences, dataset):
+	# parse through our 5 datasets of sentence pairs
+	for dataset_num in range(len(datasets)):
+		counter=0
+		similarity_scores = []
+		print("Processing:", datasets[dataset_num])
+		# prase through each sentence pair of dataset
+		for i in tqdm(range(0, len(sentences[dataset_num]), 2)):
+			similarity_scores.append(str(np.dot(d2v.dv.get_vector(datasets[dataset_num]+"_"+str(i), norm=True), d2v.dv.get_vector(datasets[dataset_num]+"_"+str(i+1), norm=True)))) 
+		with open("./sts2016-english-with-gs-v1.0/SYSTEM_OUT."+datasets[dataset_num]+".txt", 'w') as f:
+			for sim in similarity_scores:
+				f.write(sim)
+				f.write("\n")
 
 sentences, labels = readSentences()
-similarities = SentTransformer(sentences, "all-mpnet-base-v2", datasets)
+# similarities = SentTransformer(sentences, "all-mpnet-base-v2", datasets)
+d2v = d2v_initial_load(sentences, datasets)
+D2V(d2v, sentences, datasets)
 subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
-
