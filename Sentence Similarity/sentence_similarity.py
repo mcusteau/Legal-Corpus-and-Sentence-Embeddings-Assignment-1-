@@ -132,7 +132,7 @@ def FindSimilarityWithInferSent(sentence_pair, dataset_num, model, datasets):
 	
 	return similarity
 
-def strFindSimilarityWithD2V(dataset_num, model, datasets, i):
+def FindSimilarityWithD2V(dataset_num, model, datasets, i):
 	
 	similarity = np.dot(model.dv.get_vector(datasets[dataset_num]+"_"+str(i), norm=True), model.dv.get_vector(datasets[dataset_num]+"_"+str(i+1), norm=True))
 	return similarity
