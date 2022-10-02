@@ -5,6 +5,8 @@ import subprocess
 import numpy as np
 import nltk
 import torch
+import tensorflow as tf
+import tensorflow_hub as hub
 
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer, util
@@ -75,7 +77,7 @@ def d2v_preprocess(sentences, dataset):
 
 	return d2v
 
-def Bert_preprocess(sentences, datasets, model_name):
+def Bert_preprocess(model_name):
 
 	model = SentenceTransformer(model_name)
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -107,6 +109,12 @@ def InferSent_preprocess(sentences, datasets):
 	infersent.build_vocab(vocab_data)
 	print(vocab_data)
 	return infersent
+
+def UniversalSentenceEncoder_preprocess():
+	module_url = "https://tfhub.dev/google/universal-sentence-encoder/4" 
+	model = hub.load(module_url)
+	print ("module %s loaded" % module_url)
+	return model
 
 
 ########### cosine similarity functions
@@ -142,6 +150,15 @@ def FindSimilarityWithTransformer(sentence_pair, dataset_num, model, datasets):
 	return similarity.item()
 
 
+def FindSimilarityWithUSE(sentence_pair, dataset_num, model, datasets):
+
+	# create embeddigns of our two sentences
+	query_embedding = model([sentence_pair[0]])[0]
+	passage_embedding = model([sentence_pair[1]])[0]
+
+	similarity = np.dot(query_embedding, passage_embedding)/(np.linalg.norm(query_embedding)*np.linalg.norm(passage_embedding))
+
+	return similarity
 
 ########### Evaluation function
 
@@ -151,11 +168,13 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 
 	match model_name:
 		case "Bert":
-			model = Bert_preprocess(sentences, datasets, "all-mpnet-base-v2")
+			model = Bert_preprocess("all-mpnet-base-v2")
 		case "D2V":
 			model = d2v_preprocess(sentences, datasets)
 		case "InferSent":
 			model = InferSent_preprocess(sentences, datasets)
+		case "USE":
+			model = UniversalSentenceEncoder_preprocess()
 		case _:
 			raise Exception("Invalid Model Name") 
 
@@ -176,6 +195,8 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 					similarity_scores.append(str(FindSimilarityWithD2V(dataset_num, model, datasets, i)))
 				case "InferSent":
 					similarity_scores.append(str(FindSimilarityWithInferSent(sentences[dataset_num][i], dataset_num, model, datasets)))
+				case "USE":
+					similarity_scores.append(str(FindSimilarityWithUSE(sentences[dataset_num][i], dataset_num, model, datasets)))
 		# write down our results in txt file
 		with open("./sts2016-english-with-gs-v1.0/SYSTEM_OUT."+datasets[dataset_num]+".txt", 'w') as f:
 			for sim in similarity_scores:
@@ -188,8 +209,10 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 sentences, labels = readSentences()
 
 
-# Choices of model names: Bert, D2V, InferSent
-infersent = EvaluateSimilarity(sentences, datasets, "InferSent")
+# Choices of model names: Bert, D2V, InferSent, USE
+model = EvaluateSimilarity(sentences, datasets, "USE")
 
 
 subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
+
+
