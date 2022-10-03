@@ -77,7 +77,7 @@ def d2v_preprocess(sentences, dataset):
 
 	return d2v
 
-def Bert_preprocess(model_name):
+def transformer_preprocess(model_name):
 
 	model = SentenceTransformer(model_name)
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -167,14 +167,16 @@ def FindSimilarityWithUSE(sentence_pair, dataset_num, model, datasets):
 def EvaluateSimilarity(sentences, datasets, model_name):
 
 	match model_name:
-		case "Bert":
-			model = Bert_preprocess("all-mpnet-base-v2")
+		case "Mpnet":
+			model = transformer_preprocess("all-mpnet-base-v2")
 		case "D2V":
 			model = d2v_preprocess(sentences, datasets)
 		case "InferSent":
 			model = InferSent_preprocess(sentences, datasets)
 		case "USE":
 			model = UniversalSentenceEncoder_preprocess()
+		case "Roberta":
+			model = transformer_preprocess("usc-isi/sbert-roberta-large-anli-mnli-snli")
 		case _:
 			raise Exception("Invalid Model Name") 
 
@@ -189,7 +191,7 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 		for i in tqdm(range(len(sentences[dataset_num]))):
 			# calculate their cosine similarity
 			match model_name:
-				case "Bert":
+				case "Mpnet":
 					similarity_scores.append(str(FindSimilarityWithTransformer(sentences[dataset_num][i], dataset_num, model, datasets)))
 				case "D2V":
 					similarity_scores.append(str(FindSimilarityWithD2V(dataset_num, model, datasets, i)))
@@ -197,6 +199,8 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 					similarity_scores.append(str(FindSimilarityWithInferSent(sentences[dataset_num][i], dataset_num, model, datasets)))
 				case "USE":
 					similarity_scores.append(str(FindSimilarityWithUSE(sentences[dataset_num][i], dataset_num, model, datasets)))
+				case "Roberta":
+					similarity_scores.append(str(FindSimilarityWithTransformer(sentences[dataset_num][i], dataset_num, model, datasets)))
 		# write down our results in txt file
 		with open("./sts2016-english-with-gs-v1.0/SYSTEM_OUT."+datasets[dataset_num]+".txt", 'w') as f:
 			for sim in similarity_scores:
@@ -209,8 +213,8 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 sentences, labels = readSentences()
 
 
-# Choices of model names: Bert, D2V, InferSent, USE
-model = EvaluateSimilarity(sentences, datasets, "USE")
+# Choices of model names: Mpnet, D2V, InferSent, USE, Roberta
+model = EvaluateSimilarity(sentences, datasets, "Roberta")
 
 
 subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
