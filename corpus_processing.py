@@ -73,9 +73,9 @@ def word_count(tokens):
 	return token_dict 
 
 def sort_frequencies(token_dict):
-	token_dict1= {k: v for k, v in sorted(token_dict.items(), key=lambda  pair: pair[1], reverse=True)}
+	token_dict_sorted= {k: v for k, v in sorted(token_dict.items(), key=lambda  pair: pair[1], reverse=True)}
 
-	return token_dict1
+	return token_dict_sorted
 
 
 def print_results(token_dict):
@@ -164,10 +164,11 @@ def compute_bigrams(tokens):
 	# bigrams = [b for l in tokens for b in zip(l,l)]
 	bigrams=[]
 	n=len(tokens)
-	# print("Biagrams are:\n")
+	print("Bigrams are:\n")
 	for i in range(n-1):
-		bigram=[tokens[i],tokens[i+1]]
+		bigram=(tokens[i],tokens[i+1])
 		bigrams.append(bigram)
+	# print(bigrams)
 	return bigrams
 
 	# bigrams_without_stopwords = [(a,b) for a,b in nltk.bigrams(brown.words(categories="romance")) if a not in stopwords.words('english') and b not in stopwords.words('english')]
@@ -175,21 +176,24 @@ def compute_bigrams(tokens):
 	# print(bigrams_without_stopwords_fd.most_common(50))
 
 #FIX THIS
-# def bigram_frequency(bigrams):
+def bigram_frequency(bigrams):
 
-# 	# u_tokens=get_unique_tokens(tokens)
-# 	# bigram_dict=dict.fromkeys(bigrams,0)
-# 	bigram_dict={}
-# 	for bigram in bigrams:
-# 		# bigram_dict[bigram]+=1
-# 		if (bigram not in bigram_dict.keys()):
-# 			bigram_dict.update({bigram: 1})
-# 		else:       
-# 	    	bigram_dict[bigram] += 1
+	# u_tokens=get_unique_tokens(tokens)
+	# bigram_dict=dict.fromkeys(bigrams,0)
+	bigram_dict={}
+	for bigram in bigrams:
+		# bigram_dict[bigram]+=1
+		if (bigram not in bigram_dict.keys()):
+			bigram_dict.update({bigram: 1})
+		else:       
+			bigram_dict[bigram] += 1
 
-# 	return bigram_dict 
+	return bigram_dict 
 
+def sort_bigram_frequencies(bigram_dict):
+	bigram_dict_sorted= {k: v for k, v in sorted(bigram_dict.items(), key=lambda  pair: pair[1], reverse=True)}
 
+	return bigram_dict_sorted
 
 def process_corpus(file_string, raw=False, exclude_stopwords=True):
 # raw=True then tokens are not modified
@@ -217,7 +221,7 @@ def process_corpus(file_string, raw=False, exclude_stopwords=True):
 
 	token_dict=word_count(tokens)
 	sorted_freq=sort_frequencies(token_dict)
-	# print_results(sorted_freq)
+	print_results(sorted_freq)
 	# print("--- %s seconds ---" % (time.time() - start_time))
 
 	count_one=0
@@ -227,9 +231,11 @@ def process_corpus(file_string, raw=False, exclude_stopwords=True):
 	n_tokens_appeared_once=str(count_one)+" tokens appeared only once in the corpus."
 	
 	bigrams=compute_bigrams(tokens)
-	# bigram_dict=bigram_frequency(bigrams)
-	print("Biagram frequencies are:\n",bigram_dict)
-	
+	bigram_dict=bigram_frequency(bigrams)
+	# print("Bigram frequencies are:\n",bigram_dict)
+	sorted_bigram_dict=sort_frequencies(bigram_dict)
+	print("\n\n\n\nSORTED bigram frequencies are:\n",sorted_bigram_dict)
+
 	if (raw):
 		filename='Report_results_raw.txt'
 		results = io.open(filename, 'w')
