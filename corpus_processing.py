@@ -50,7 +50,8 @@ def get_unique_tokens(tokens):
 	u_tokens = []
 	visited = set()
 	for word in tokens:
-		lword=word.lower()
+		#lword=word.lower()
+		lword = word
 		if lword not in visited:
 			u_tokens.append(lword)
 		visited.add(lword)
@@ -67,7 +68,8 @@ def word_count(tokens):
 	token_dict=dict.fromkeys(u_tokens,0)
 
 	for token in tokens:
-		ltoken=token.lower()
+		#ltoken=token.lower()
+		ltoken=token
 		token_dict[ltoken]+=1
 
 	return token_dict 
@@ -154,8 +156,9 @@ def remove_stopwords(tokens):
 
 	tokens_nostop=[]
 	for token in tokens:
+		token = token.lower()
 		if token not in stop_words:
-			tokens_nostop.append(token.lower())
+			tokens_nostop.append(token)
 
 	return tokens_nostop
 
