@@ -85,7 +85,6 @@ and:3855
   :3853
 license:3819
 payment:3787
-and/or:3768
 ':3750
 order:3743
 3:3724
@@ -8627,6 +8626,7 @@ retailer:18
 subjected:18
 3.2.3:18
 fast:18
+and/or:18
 12.3.:18
 year-to-date:18
 minute:18

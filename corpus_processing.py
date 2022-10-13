@@ -46,29 +46,42 @@ def tokenise1(doc):
 	tokens = [token.text for token in doc]
 	return tokens
 
-def get_unique_tokens(tokens):
-	u_tokens = []
-	visited = set()
-	for word in tokens:
-		lword=word.lower()
-		if lword not in visited:
-			u_tokens.append(lword)
-		visited.add(lword)
-	return u_tokens
+# def get_unique_tokens(tokens):
+# 	u_tokens = []
+# 	visited = set()
+# 	for word in tokens:
+# 		#lword=word.lower()
+# 		lword = word
+# 		if lword not in visited:
+# 			u_tokens.append(lword)
+# 		visited.add(lword)
+# 	return u_tokens
 	# now out has "unique" tokens
 
-def word_count(tokens):
+def word_count(tokens,lower=False):
 	# word_freq = Counter(tokens)
 	# common_words = word_freq.most_common(5)
 	# print (common_words)
 	# { _key : _value(_key) for tokens in _container }
 
-	u_tokens=get_unique_tokens(tokens)
-	token_dict=dict.fromkeys(u_tokens,0)
+	# u_tokens=get_unique_tokens(tokens)
+	# token_dict=dict.fromkeys(u_tokens,0)
 
+	# for token in tokens:
+	# 	#ltoken=token.lower()
+	# 	ltoken=token
+	# 	token_dict[ltoken]+=1
+
+	token_dict={}
 	for token in tokens:
-		ltoken=token.lower()
-		token_dict[ltoken]+=1
+
+		if (lower):
+			token=token.lower()
+
+		if (token not in token_dict.keys()):
+			token_dict.update({token: 1})
+		else:       
+			token_dict[token] += 1
 
 	return token_dict 
 
@@ -154,8 +167,9 @@ def remove_stopwords(tokens):
 
 	tokens_nostop=[]
 	for token in tokens:
+		# token = token.lower()
 		if token not in stop_words:
-			tokens_nostop.append(token.lower())
+			tokens_nostop.append(token)
 
 	return tokens_nostop
 
@@ -195,7 +209,7 @@ def sort_bigram_frequencies(bigram_dict):
 
 	return bigram_dict_sorted
 
-def process_corpus(file_string, raw=False, exclude_stopwords=True):
+def test_process_corpus(file_string, raw=False,lower=False, exclude_stopwords=True):
 # raw=True then tokens are not modified
 # exclude_stopwords=True then punctuations and stopwords are removed else only punctuations are removed
 
@@ -211,18 +225,22 @@ def process_corpus(file_string, raw=False, exclude_stopwords=True):
 	if (exclude_stopwords):
 		tokens=remove_stopwords(tokens)
 
-	unique_tokens=get_unique_tokens(tokens)
-
-	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
-	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(len(unique_tokens))
-	type_token_ratio="# of types (unique tokens) / token ratio: "+str(len(tokens)/len(unique_tokens))
-
+	
 	# start_time = time.time()
 
-	token_dict=word_count(tokens)
+	token_dict=word_count(tokens,lower)
 	sorted_freq=sort_frequencies(token_dict)
 	print_results(sorted_freq)
 	# print("--- %s seconds ---" % (time.time() - start_time))
+
+	# unique_tokens____2=len(token_dict)
+	# n_unique_tokens_in_the_corpus____2="# unique tokens in the corpus: "+str(unique_tokens____2)+""
+	# print("\n","# unique tokens in the corpus: ",n_unique_tokens_in_the_corpus____2)
+	n_unique_tokens=len(token_dict)
+	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
+	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
+	type_token_ratio="# of types (unique tokens) / token ratio: "+str(len(tokens)/n_unique_tokens)
+	print("\n",n_unique_tokens_in_the_corpus)
 
 	count_one=0
 	for once in sorted_freq.values():
@@ -234,7 +252,7 @@ def process_corpus(file_string, raw=False, exclude_stopwords=True):
 	bigram_dict=bigram_frequency(bigrams)
 	# print("Bigram frequencies are:\n",bigram_dict)
 	sorted_bigram_dict=sort_frequencies(bigram_dict)
-	print("\n\n\n\nSORTED bigram frequencies are:\n",sorted_bigram_dict)
+	# print("\n\n\n\nSORTED bigram frequencies are:\n",sorted_bigram_dict)
 
 	if (raw):
 		filename='Report_results_raw.txt'
@@ -253,11 +271,15 @@ def process_corpus(file_string, raw=False, exclude_stopwords=True):
 			results.write(f'{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
 			results.close()
 
+
+
+
 	
 
-# process_corpus(file_string,True,False)
-# process_corpus(file_string,exclude_stopwords=False)
-process_corpus(file_string)
+# test_process_corpus(file_string,raw=True,exclude_stopwords=False)
+# test_process_corpus(file_string,exclude_stopwords=False)
+test_process_corpus(file_string)
+test_process_corpus(file_string, lower=True)
 
 
 
