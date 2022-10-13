@@ -56,6 +56,7 @@ def tokenise1(doc):
 # 			u_tokens.append(lword)
 # 		visited.add(lword)
 # 	return u_tokens
+
 	# now out has "unique" tokens
 
 def word_count(tokens,lower=False):
@@ -108,17 +109,15 @@ def print_results(token_dict):
 # create tokens
 def tokenise(doc):
 	
-	#reg = '''[\.'](?=[\s\t])|[\[\("\]\)\:\?\!\:]|(?<=[\s\t])[']'''
+	with open('contractions.txt', 'r') as f:
+		contractions = f.read().split(",")
 
-	find_abbreviations = r'''(?<=[\s\t])[A-Z][\.a-zA-Z]*\.(?=[\s\t])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
+	find_abbreviations = r'''(?<=[\s\t\n])[A-Z][\.a-zA-Zéèàëôùç]*\.(?=[\s\t\n])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
 
-	find_abbreviations2 = r'''(?<=[\s\t])[a-zA-Z\d]+\.[a-zA-Z\.\d]+(?=[\s\t])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
+	find_abbreviations2 = r'''(?<=[\s\t\n])[a-zA-Zéèàëôùç\d]+\.[a-zA-Zéèàëôùç\.\d]+(?=[\s\t\n])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
 
 	find_numbers_with_commas = r'''\d+,[\d,\.]+''' # finds numbers with commas like "1,000,000.12"
 
-	find_contractions_and_possesive = r'''[a-zA-Z]+'[a-zA-Z]+''' # finds contractions like "don't" and possesive words like "supplier's"    
-
-	#find_plurial_possisive = r'''(?<=[\s\t])[^\'][a-zA-Z]+\'(?=[\s\t])''' # finds contractions like James' but looking for words that end however this is probematic
 
 	# dictionary of special words that we dont want edited during tokenization
 	special_case_dict = {}
@@ -138,27 +137,31 @@ def tokenise(doc):
 	for num in comma_numbers:
 		special_case_dict[num] = [{ORTH: num}]
 
-	contractions = re.findall(find_contractions_and_possesive, doc)
-	# print(contractions)
 	for con in contractions:
+		#print(con)
 		special_case_dict[con] = [{ORTH: con}]
+		special_case_dict[con.capitalize()] = [{ORTH: con.capitalize()}]
+		special_case_dict[con.upper()] = [{ORTH: con.upper()}]
+
 
 	# Note that these next regex expressions will not impact our special words we added to dictioanry
 
-	prefix_regex = re.compile(r'''^[\[\("']''') # seperates words from punctuation marks: [ ( " '     
+	prefix_regex = re.compile(r'''^[{\[\("']''') # seperates words from punctuation marks: [ ( " ' that are located at the beginning of the word
 
-	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"']''') # seperates words from punctuation marks: ] ) : ? ! . " , '     
+	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"';}&\-]$''') # seperates words from punctuation marks: ] ) : ? ! . " , ' ; that are located at the end of the word
 
-	http_catcher = re.compile(r'''https:[^\s\t]+''') # catches URLs that start with https:
+	infix_regex = re.compile(r'''(?<=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])[\-'\\\:\(\/&;](?=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])|(?<=[\d])['](?=[a-zA-Zéèàëôùç])|(?<=[a-zA-Z\[\]\(\)\*.])'-(?=[a-zA-Z\[\]\(\)\*.])''') # splits words in two when seeing - ' \ : ( ) / & ;  between two letters
+
+	http_catcher = re.compile(r'''https:[^\s\t\n]+''') # catches URLs that start with https:
 
 	# build our tokenizer
-	tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, suffix_search=suffix_regex.search, url_match=http_catcher.search)
+	tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, infix_finditer= infix_regex.finditer, suffix_search=suffix_regex.search, url_match=http_catcher.search)
 
 	# tokenize document
 	doc = tokenizer(doc)
 
 	tokens = [token.text for token in doc]
-	
+		
 	return tokens
 
 def remove_stopwords(tokens):
@@ -168,6 +171,7 @@ def remove_stopwords(tokens):
 	tokens_nostop=[]
 	for token in tokens:
 		# token = token.lower()
+
 		if token not in stop_words:
 			tokens_nostop.append(token)
 
@@ -278,7 +282,7 @@ def test_process_corpus(file_string, raw=False,lower=False, exclude_stopwords=Tr
 
 # test_process_corpus(file_string,raw=True,exclude_stopwords=False)
 # test_process_corpus(file_string,exclude_stopwords=False)
-test_process_corpus(file_string)
+# test_process_corpus(file_string)
 test_process_corpus(file_string, lower=True)
 
 
