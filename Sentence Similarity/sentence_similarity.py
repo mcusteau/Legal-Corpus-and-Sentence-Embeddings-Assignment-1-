@@ -66,20 +66,25 @@ def d2v_preprocess(sentences, dataset):
 
 		tagged_data += [TaggedDocument(words=word_tokenize(_d.lower()), tags=[datasets[dataset_num]+"_"+str(i)]) for i, _d in enumerate(vocab_data)]
 	
-	d2v = Doc2Vec(vector_size=100,alpha=0.025, min_count=1)
+	# create our model
+	d2v = Doc2Vec(vector_size=30,alpha=0.025, min_count=1)
 	d2v.build_vocab(tagged_data)
 
-	for epoch in tqdm(range(100)):
+	# create embedding of sentences
+	for epoch in tqdm(range(30)):
 		d2v.train(tagged_data,
                 total_examples=d2v.corpus_count,
                 epochs=d2v.epochs)
     
-
+	d2v.save("./d2v_model")
 	return d2v
 
 def transformer_preprocess(model_name):
 
+	#load model
 	model = SentenceTransformer(model_name)
+	
+	# check if we can use GPU for training
 	device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 	torch.cuda.empty_cache()
 	model.to(device)
@@ -98,6 +103,7 @@ def InferSent_preprocess(sentences, datasets):
 	W2V_PATH = 'fastText/crawl-300d-2M.vec'
 	infersent.set_w2v_path(W2V_PATH)
 
+	# Build Vocabulary
 	vocab_data = []
 	for dataset_num in range(len(datasets)):
 		similarity_scores = []
@@ -111,6 +117,7 @@ def InferSent_preprocess(sentences, datasets):
 	return infersent
 
 def UniversalSentenceEncoder_preprocess():
+	# Load Model
 	module_url = "https://tfhub.dev/google/universal-sentence-encoder/4" 
 	model = hub.load(module_url)
 	print ("module %s loaded" % module_url)
@@ -123,7 +130,6 @@ def UniversalSentenceEncoder_preprocess():
 def FindSimilarityWithInferSent(sentence_pair, dataset_num, model, datasets):
 
 	# create embeddigns of our two sentences
-
 	query_embedding = model.encode(sentence_pair[0], tokenize=True)[0]
 	passage_embedding = model.encode(sentence_pair[1], tokenize=True)[0]
 
@@ -134,6 +140,7 @@ def FindSimilarityWithInferSent(sentence_pair, dataset_num, model, datasets):
 
 def FindSimilarityWithD2V(dataset_num, model, datasets, i):
 	
+	# find their cosine similarity by calculating dot score of their embeddings
 	similarity = np.dot(model.dv.get_vector(datasets[dataset_num]+"_"+str(i), norm=True), model.dv.get_vector(datasets[dataset_num]+"_"+str(i+1), norm=True))
 	return similarity
 
@@ -156,6 +163,7 @@ def FindSimilarityWithUSE(sentence_pair, dataset_num, model, datasets):
 	query_embedding = model([sentence_pair[0]])[0]
 	passage_embedding = model([sentence_pair[1]])[0]
 
+	# find the cosine similarity of the embeddings
 	similarity = np.dot(query_embedding, passage_embedding)/(np.linalg.norm(query_embedding)*np.linalg.norm(passage_embedding))
 
 	return similarity
@@ -181,7 +189,6 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 			raise Exception("Invalid Model Name") 
 
 
-	similarity_score = []
 
 	# parse through our 5 datasets of sentence pairs
 	for dataset_num in range(len(datasets)):
@@ -208,13 +215,11 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 				f.write("\n")
 
 
-
-
 sentences, labels = readSentences()
 
 
 # Choices of model names: Mpnet, D2V, InferSent, USE, Roberta
-model = EvaluateSimilarity(sentences, datasets, "Roberta")
+model = EvaluateSimilarity(sentences, datasets, "Mpnet")
 
 
 subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
