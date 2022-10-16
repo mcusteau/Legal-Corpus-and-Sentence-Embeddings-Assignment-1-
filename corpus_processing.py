@@ -1,11 +1,9 @@
 import os
 import spacy
-# from collections import Counter
 from spacy.lang.en import English
 from spacy.tokenizer import Tokenizer
 from spacy.symbols import ORTH
 import re
-# import time
 import io
 
 
@@ -14,6 +12,8 @@ files = ""
 nlp = English()
 
 def mergeFiles(directory="./CUAD_v1/full_contract_txt/"):
+	""" Reads all the documents and returns a string of the files
+	"""
 	files = " "
 	for filename in os.listdir(directory):
 		with open(os.path.join(directory,  filename)) as f:
@@ -24,8 +24,8 @@ file_string = mergeFiles()
 
 
 def lowercase(tokens):
-'''Returns the lowercased list of tokens
-'''
+	"""Returns the lowercased list of tokens
+	"""
 	n=len(tokens)
 	for i in range(n):
 		tokens[i]=tokens[i].lower()
@@ -33,9 +33,9 @@ def lowercase(tokens):
 
 
 def word_count(tokens):
-'''Creates a dictionary with the tokens and their frequencies in the corpus.
-	The tokens need to be lowercased before calling this function for a higher accuracy in the results.
-'''
+	"""Creates a dictionary with the tokens and their frequencies in the corpus.
+		The tokens need to be lowercased before calling this function for a higher accuracy in the results.
+	"""
 	token_dict={}
 	for token in tokens:
 		if (token not in token_dict.keys()):
@@ -46,15 +46,15 @@ def word_count(tokens):
 
 
 def sort_frequencies(token_dict):
-''' Returns the sorted dictionary of the tokens in descending order
-'''
+	""" Returns the sorted dictionary of the tokens in descending order
+	"""
 	token_dict_sorted= {k: v for k, v in sorted(token_dict.items(), key=lambda  pair: pair[1], reverse=True)}
 	return token_dict_sorted
 
 
 def appeard_n_times(token_dict,n):	
-'''Returns the # of the tokens that appeard n times
-'''
+	"""Returns the # of the tokens that appeard n times
+	"""
 	count_n=0
 	for once in token_dict.values():
 		if once==n:
@@ -63,8 +63,8 @@ def appeard_n_times(token_dict,n):
 
 
 def print_tokens(tokens,filename):
-''' Prints the list of the tokens to a new txt file
-'''
+	""" Prints the list of the tokens to a new txt file
+	"""
 	# prints to a new line
 	with open(filename, 'w') as file: 
 	    for token in tokens: 
@@ -73,8 +73,8 @@ def print_tokens(tokens,filename):
 
 
 def print_freq(token_dict,filename):
-''' Prints the dictinary of the tokens/bigrams to a new txt file
-'''
+	""" Prints the dictinary of the tokens/bigrams to a new txt file
+	"""
 	# prints to a new line
 	count=0
 	with open(filename, 'w') as file: 	
@@ -86,12 +86,15 @@ def print_freq(token_dict,filename):
 
 # create tokens
 def tokenise(doc, raw=False):
-''' This is our main tokeniser function.
-'''
-		
+	""" This is our main tokeniser function.
+	"""
+
+	# takes the tokens as they are	
 	if (raw):
 		# build our tokenizer
 		tokenizer = Tokenizer(nlp.vocab)
+
+	# extracts the words 	
 	else:
 		with open('contractions.txt', 'r') as f:
 			contractions = f.read().split(",")
@@ -141,17 +144,15 @@ def tokenise(doc, raw=False):
 		# build our tokenizer
 		tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, infix_finditer= infix_regex.finditer, suffix_search=suffix_regex.search, url_match=http_catcher.search)
 
-
-
 	# tokenize document
 	doc = tokenizer(doc)
 	tokens = [token.text for token in doc]
 		
 	return tokens
-z
+
 def remove_punctuations(tokens):
-''' Removes the empty tokens or the tokens that consists of punctuation or symbols. Returns the new enhanced list of tokens.
-'''
+	""" Removes the empty tokens or the tokens that consists of punctuation or symbols. Returns the new enhanced list of tokens.
+	"""
 	# list of all the symbols and punctuations 
 	punctuation = '''!"#$%&\'-()...***...…***…*****+,.///:;<=>?@[\\]^_`—{|}·•\'\'●§§§~\n\n\n\n\n\n\n\n\t\t\t\t\t\t\t\s\s\s\s\s\s\s\s\s     
 
@@ -174,10 +175,10 @@ def remove_punctuations(tokens):
 
 
 def remove_stopwords(tokens):
-''' Creates a list with all the stopwords from the given text file.
-	Removes the tokens that consists of stopwords. 
-	Returns the new enhanced list of tokens.
-'''
+	""" Creates a list with all the stopwords from the given text file.
+		Removes the tokens that consists of stopwords. 
+		Returns the new enhanced list of tokens.
+	"""
 	with open('stopwords.txt', 'r') as f:
 		stop_words = [line.strip() for line in f]
 
@@ -186,13 +187,13 @@ def remove_stopwords(tokens):
 		
 		if token not in stop_words:
 			tokens_nostop.append(token)
-
+			
 	return tokens_nostop
 
 
 def compute_bigrams(tokens):
-''' Returns a list of tuples created with every 2 consecutive words in the list of tokens.
-'''
+	""" Returns a list of tuples created with every 2 consecutive words in the list of tokens.
+	"""
 	bigrams=[]
 	n=len(tokens)
 	# print("Bigrams are:\n")
@@ -203,29 +204,13 @@ def compute_bigrams(tokens):
 	return bigrams
 
 
-def bigram_frequency(bigrams):
-'''
-'''
-	bigram_dict={}
-	for bigram in bigrams:
-		# bigram_dict[bigram]+=1
-		if (bigram not in bigram_dict.keys()):
-			bigram_dict.update({bigram: 1})
-		else:       
-			bigram_dict[bigram] += 1
-
-	return bigram_dict 
-
-def sort_bigram_frequencies(bigram_dict):
-	bigram_dict_sorted= {k: v for k, v in sorted(bigram_dict.items(), key=lambda  pair: pair[1], reverse=True)}
-
-	return bigram_dict_sorted
-
-
-
 def process_corpus(file_string):
-'''
-'''
+	"""
+	There are 3 types of results while processing the corpus :
+	1) Raw tokens
+	2) punctuations removed
+	3) punctuations and stopwords removed 
+	"""
 
 
 	####################
@@ -233,14 +218,17 @@ def process_corpus(file_string):
 	####################
 	raw=True
 	lower=True
-	tokens = tokenise(file_string,raw) # word tokenizer
+	tokens = tokenise(file_string,raw) # tokenising the document
+
 	if (lower):
 		tokens=lowercase(tokens)	# lowercasing the tokens
-	token_dict=word_count(tokens)	# 
+
+	token_dict=word_count(tokens)	# dictionnary with word frequencies
 	sorted_freq=sort_frequencies(token_dict)
 
 	print_tokens(tokens,"outputs.txt")
 	print_freq(sorted_freq,"tokens.txt")
+
 	title="Raw tokens"
 	islowercase="lower case before processing: "+str(lower)
 	n_unique_tokens=len(token_dict)
@@ -253,21 +241,24 @@ def process_corpus(file_string):
 	results.write(f'{title}\n{islowercase}\n{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
 	results.close()
 
+
 	####################
 	# no punctuation
 	####################
-	raw=False
+	# raw=False
 	lower=True
-	tokens = tokenise(file_string)
+	tokens = tokenise(file_string) # tokenising the document
+
 	if (lower):
 		tokens=lowercase(tokens)
-	tokens=remove_punctuations(tokens)
-	token_dict=word_count(tokens,lower)
+
+	tokens=remove_punctuations(tokens) 	# remove punctutation
+	token_dict=word_count(tokens)
 	sorted_freq=sort_frequencies(token_dict)
-	
 
 	print_tokens(tokens,"outputs_enhanced_no_punct.txt")
 	print_freq(sorted_freq,"tokens_enhanced_no_punct.txt")
+
 	title="\n\nPunctuation excluded"
 	islowercase="lower case before processing: "+str(lower)
 	n_unique_tokens=len(token_dict)
@@ -280,28 +271,30 @@ def process_corpus(file_string):
 	results.write(f'{title}\n{islowercase}\n{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
 	results.close()
 
+
 	####################
 	# no punctuation, no stopwords
 	####################
 	# raw=False
 	lower=True
-	tokens = tokenise(file_string)
+	tokens = tokenise(file_string) # tokenising the document
+
 	if (lower):
 		tokens=lowercase(tokens)
-	tokens=remove_punctuations(tokens)
-	tokens=remove_stopwords(tokens)
-	token_dict=word_count(tokens,lower)
+
+	tokens=remove_punctuations(tokens) # remove punctutation
+	tokens=remove_stopwords(tokens)	# remove stopwords
+	token_dict=word_count(tokens)
 	sorted_freq=sort_frequencies(token_dict)
 
-	bigrams=compute_bigrams(tokens)
-	bigram_dict=bigram_frequency(bigrams)
-	# bigram_dict=word_count(bigrams)
-	
+	bigrams=compute_bigrams(tokens) # create bigrams
+	bigram_dict=word_count(bigrams)
 	sorted_bigram_dict=sort_frequencies(bigram_dict)
 
 	print_tokens(tokens,"outputs_enhanced_no_punct_stopw.txt")
 	print_freq(sorted_freq,"tokens_enhanced_no_punct_stopw.txt")
 	print_freq(sorted_bigram_dict,"bigrams.txt")
+
 	title="\n\nPunctuation AND Stopwords excluded"
 	islowercase="lower case before processing: "+str(lower)
 	n_unique_tokens=len(token_dict)
