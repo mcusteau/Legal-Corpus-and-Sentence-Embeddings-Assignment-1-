@@ -67,11 +67,11 @@ def d2v_preprocess(sentences, dataset):
 		tagged_data += [TaggedDocument(words=word_tokenize(_d.lower()), tags=[datasets[dataset_num]+"_"+str(i)]) for i, _d in enumerate(vocab_data)]
 	
 	# create our model
-	d2v = Doc2Vec(vector_size=30,alpha=0.025, min_count=1)
+	d2v = Doc2Vec(vector_size=50,alpha=0.025, min_count=1)
 	d2v.build_vocab(tagged_data)
 
 	# create embedding of sentences
-	for epoch in tqdm(range(30)):
+	for epoch in tqdm(range(20)):
 		d2v.train(tagged_data,
                 total_examples=d2v.corpus_count,
                 epochs=d2v.epochs)
@@ -219,7 +219,7 @@ sentences, labels = readSentences()
 
 
 # Choices of model names: Mpnet, D2V, InferSent, USE, Roberta
-model = EvaluateSimilarity(sentences, datasets, "Mpnet")
+model = EvaluateSimilarity(sentences, datasets, "USE")
 
 
 subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
