@@ -99,9 +99,9 @@ def tokenise(doc, raw=False):
 		with open('contractions.txt', 'r') as f:
 			contractions = f.read().split(",")
 
-		find_abbreviations = r'''(?<=[\s\t\n])[A-Z][\.a-zA-Zéèàëôùç]*\.(?=[\s\t\n])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
+		find_abbreviations = r'''(?<=[\s\t\n\r])[A-Z][\.a-zA-Zéèàëôùç]*\.(?=[\s\t\n\r])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
 
-		find_abbreviations2 = r'''(?<=[\s\t\n])[a-zA-Zéèàëôùç\d]+\.[a-zA-Zéèàëôùç\.\d]+(?=[\s\t\n])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
+		find_abbreviations2 = r'''(?<=[\s\t\n\r])[a-zA-Zéèàëôùç\d]+\.[a-zA-Zéèàëôùç\.\d]+(?=[\s\t\n\r])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
 
 		find_numbers_with_commas = r'''\d+,[\d,\.]+''' # finds numbers with commas like "1,000,000.12"
 
@@ -139,7 +139,7 @@ def tokenise(doc, raw=False):
 
 		infix_regex = re.compile(r'''(?<=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])[\-'\\\:\(\/&;](?=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])|(?<=[\d])['](?=[a-zA-Zéèàëôùç])|(?<=[a-zA-Z\[\]\(\)\*.])'-(?=[a-zA-Z\[\]\(\)\*.])''') # splits words in two when seeing - ' \ : ( ) / & ;  between two letters
 
-		http_catcher = re.compile(r'''https:[^\s\t\n]+''') # catches URLs that start with https:
+		http_catcher = re.compile(r'''https:[^\s\t\n\r]+''') # catches URLs that start with https:
 
 		# build our tokenizer
 		tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, infix_finditer= infix_regex.finditer, suffix_search=suffix_regex.search, url_match=http_catcher.search)
