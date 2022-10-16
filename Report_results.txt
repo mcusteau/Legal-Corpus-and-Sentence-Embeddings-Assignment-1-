@@ -8,15 +8,15 @@ lower case before processing: True
 
 Punctuation excluded
 lower case before processing: True
-# of tokens in the corpus: 4002037
-# unique tokens in the corpus: 47752
-("lexical diversity", # of types (unique tokens) / token ratio : 0.011931923667872137
-20029 tokens appeared only once in the corpus.
+# of tokens in the corpus: 4001994
+# unique tokens in the corpus: 47748
+("lexical diversity", # of types (unique tokens) / token ratio : 0.01193105237039336
+20028 tokens appeared only once in the corpus.
 
 
 Punctuation AND Stopwords excluded
 lower case before processing: True
-# of tokens in the corpus: 1996140
-# unique tokens in the corpus: 47134
-"lexical density", # of types (unique tokens) / token ratio: 0.023612572264470427
-19994 tokens appeared only once in the corpus.
+# of tokens in the corpus: 1996097
+# unique tokens in the corpus: 47130
+"lexical density", # of types (unique tokens) / token ratio: 0.023611077016798283
+19993 tokens appeared only once in the corpus.
