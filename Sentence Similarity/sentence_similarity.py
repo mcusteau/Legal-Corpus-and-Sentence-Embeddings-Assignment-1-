@@ -194,7 +194,7 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 	for dataset_num in range(len(datasets)):
 		similarity_scores = []
 		print("Processing:", datasets[dataset_num])
-		# prase through each sentence pair of dataset
+		# parse through each sentence pair of dataset
 		for i in tqdm(range(len(sentences[dataset_num]))):
 			# calculate their cosine similarity
 			match model_name:
@@ -215,13 +215,16 @@ def EvaluateSimilarity(sentences, datasets, model_name):
 				f.write("\n")
 
 
-sentences, labels = readSentences()
+def main():
+
+	model_name = input("\nEnter your choice of model: Mpnet, D2V, InferSent, USE, Roberta\n")
+
+	sentences, labels = readSentences()
+
+	# Choices of model names: Mpnet, D2V, InferSent, USE, Roberta
+	model = EvaluateSimilarity(sentences, datasets, model_name)
+
+	subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
 
 
-# Choices of model names: Mpnet, D2V, InferSent, USE, Roberta
-model = EvaluateSimilarity(sentences, datasets, "USE")
-
-
-subprocess.run("./correlation-noconfidence.pl STS2016.gs.headlines.txt SYSTEM_OUT.headlines.txt", shell=True, cwd='./sts2016-english-with-gs-v1.0')
-
-
+main()
