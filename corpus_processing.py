@@ -153,20 +153,8 @@ def tokenise(doc, raw=False):
 def remove_punctuations(tokens):
 	""" Removes the empty tokens or the tokens that consists of punctuation or symbols. Returns the new enhanced list of tokens.
 	"""
-	# list of all the symbols and punctuations 
-	punctuation = '''!"#$%&\'-()...***...…***…*****+,.///:;<=>?@[\\]^_`—{|}·•\'\'●§§§~\n\n\n\n\n\n\n\n\t\t\t\t\t\t\t\s\s\s\s\s\s\s\s\s     
-
-
-
-
-
-
-
-
-
-
-
-  '''
+	# list of all the symbols and punctuations   
+	punctuation = '''!"#$%&\'-()...***...…***…*****+,.///:;<=>?@[·[*\\]^_`—{|}·•\'\'●§§§~...***...]%\n\n\n\n\n\n\n\n\t\t\t\t\t\t\t\s\s\s\s\s\s\s\s\s\r\r\r\r\r\r\r\r'''
 	tokens_nopunc=[]
 	for token in tokens:
 		if (token not in punctuation) and (token.strip()!=""):
