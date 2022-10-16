@@ -1,10 +1,20 @@
+Michel Custeau,  8658589
+Beril Borali, 300036112
+
+
 PART 1:
+
+For the necessary libraries, please see the "requirements.txt" file. The data folder needs to be named as "CUAD_v1" and be in the main directory . You need Python 3.8 to run the program. For running the program:
+
+1. cd into the main folder (Legal-Corpus-and-Sentence-Embeddings-Assignment-1-)
+
+2. Enter "python corpus_processing.py"
 
 
 
 PART 2:
 
-Simply run sentence_similarity.py which you will find in the Sentence Similarity folder and once you run it, you will be prompted to enter the name of the model you want to use. Once sentence_similarity.py is done running, it will print in the terminal the resulting Pearson Correaltion of the model you chose. We have listed all necessary libraries in the requirements.txt file. Make sure that the inital data folder sts2016-english-with-gs-v1.0 is located inside the Sentence Similarity folder. If you want to run the InferSent model, you will be required to download certain files in order for it to work. Below Ive included the steps to download the files to run InferSent.
+Simply run sentence_similarity.py which you will find in the Sentence Similarity folder and once you run it, you will be prompted to enter the name of the model you want to use. Once sentence_similarity.py is done running, it will print in the terminal the resulting Pearson Correlation of the model you chose. We have listed all necessary libraries in the "requirements.txt" file. Make sure that the initial data folder sts2016-english-with-gs-v1.0 is located inside the Sentence Similarity folder. If you want to run the InferSent model, you will be required to download certain files in order for it to work. Below I've included the steps to download the files to run InferSent.
 
 Steps to download the required files for InferSent:
 
