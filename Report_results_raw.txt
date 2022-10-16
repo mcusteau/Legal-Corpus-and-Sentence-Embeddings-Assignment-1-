@@ -1,4 +1,5 @@
-# of tokens in the corpus: 4218959
-# unique tokens in the corpus: 92798
-# of types (unique tokens) / token ratio: 45.463900084053535
-44437 tokens appeared only once in the corpus.
+lower case before processing:False
+# of tokens in the corpus: 2449354
+# unique tokens in the corpus: 112155
+# of types (unique tokens) / token ratio: 21.83900851500156
+53153 tokens appeared only once in the corpus.
