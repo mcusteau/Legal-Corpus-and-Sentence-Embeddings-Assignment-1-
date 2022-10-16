@@ -29,6 +29,7 @@ among
 amongst
 an
 and
+and/or
 another
 any
 anybody
