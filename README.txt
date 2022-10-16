@@ -4,7 +4,7 @@ PART 1:
 
 PART 2:
 
-Simply run sentence_similarity.py which you will find in the Sentence Similarity folder and you will be prompted to enter the name of the model you want to use. Once sentence_similarity.py is done running, it will print in the terminal the resulting Pearson Correaltion of the model you chose. All these models should work given that you have all nescesary libraries installed (which we have specified in requirements.txt). The only exception to this is the InferSent model which will require you to download certain files in order for it to work. Below Ive included the steps to download the files to run InferSent.
+Simply run sentence_similarity.py which you will find in the Sentence Similarity folder and once you run it, you will be prompted to enter the name of the model you want to use. Once sentence_similarity.py is done running, it will print in the terminal the resulting Pearson Correaltion of the model you chose. We have listed all necessary libraries in the requirements.txt file. Make sure that the inital data folder sts2016-english-with-gs-v1.0 is located inside the Sentence Similarity folder. If you want to run the InferSent model, you will be required to download certain files in order for it to work. Below Ive included the steps to download the files to run InferSent.
 
 Steps to download the required files for InferSent:
 
