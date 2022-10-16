@@ -9,169 +9,181 @@ import re
 import io
 
 
-files = ""
 
+files = ""
 nlp = English()
 
 def mergeFiles(directory="./CUAD_v1/full_contract_txt/"):
-
 	files = " "
 	for filename in os.listdir(directory):
 		with open(os.path.join(directory,  filename)) as f:
 			files += f.read() + " "
 	return files		
 
-
 file_string = mergeFiles()
 
 
-# def merge2Files(nfile,directory="./CUAD_v1/full_contract_txt/"):
-
-# 	files = " "
-# 	count=0
-# 	for filename in os.listdir(directory):
-# 		while count<nfile:
-# 			with open(os.path.join(directory,  filename)) as f:
-# 				files += f.read() + " "
-# 				count+=1
-# 	return files	
-
-# file_string = merge2Files(2)
-
-def tokenise1(doc):
-	# build our tokenizer
-	tokenizer = Tokenizer(nlp.vocab)
-	# tokenize document
-	doc = tokenizer(doc)
-	tokens = [token.text for token in doc]
+def lowercase(tokens):
+'''Returns the lowercased list of tokens
+'''
+	n=len(tokens)
+	for i in range(n):
+		tokens[i]=tokens[i].lower()
 	return tokens
 
-# def get_unique_tokens(tokens):
-# 	u_tokens = []
-# 	visited = set()
-# 	for word in tokens:
-# 		#lword=word.lower()
-# 		lword = word
-# 		if lword not in visited:
-# 			u_tokens.append(lword)
-# 		visited.add(lword)
-# 	return u_tokens
 
-	# now out has "unique" tokens
-
-def word_count(tokens,lower=False):
-	# word_freq = Counter(tokens)
-	# common_words = word_freq.most_common(5)
-	# print (common_words)
-	# { _key : _value(_key) for tokens in _container }
-
-	# u_tokens=get_unique_tokens(tokens)
-	# token_dict=dict.fromkeys(u_tokens,0)
-
-	# for token in tokens:
-	# 	#ltoken=token.lower()
-	# 	ltoken=token
-	# 	token_dict[ltoken]+=1
-
+def word_count(tokens):
+'''Creates a dictionary with the tokens and their frequencies in the corpus.
+	The tokens need to be lowercased before calling this function for a higher accuracy in the results.
+'''
 	token_dict={}
 	for token in tokens:
-
-		if (lower):
-			token=token.lower()
-
 		if (token not in token_dict.keys()):
 			token_dict.update({token: 1})
 		else:       
 			token_dict[token] += 1
-
 	return token_dict 
 
-def sort_frequencies(token_dict):
-	token_dict_sorted= {k: v for k, v in sorted(token_dict.items(), key=lambda  pair: pair[1], reverse=True)}
 
+def sort_frequencies(token_dict):
+''' Returns the sorted dictionary of the tokens in descending order
+'''
+	token_dict_sorted= {k: v for k, v in sorted(token_dict.items(), key=lambda  pair: pair[1], reverse=True)}
 	return token_dict_sorted
 
 
-def print_results(token_dict):
-	# no line separation
-	# file = io.open('Results.txt', 'w')
-	# file.write(f'{token_dict} run1\n')
+def appeard_n_times(token_dict,n):	
+'''Returns the # of the tokens that appeard n times
+'''
+	count_n=0
+	for once in token_dict.values():
+		if once==n:
+			count_n+=1
+	return count_n
 
+
+def print_tokens(tokens,filename):
+''' Prints the list of the tokens to a new txt file
+'''
 	# prints to a new line
-	with open("tokens.txt", 'w') as file: 
-	    for key, value in token_dict.items(): 
-	        file.write('%s:%s\n' % (key, value))
-
+	with open(filename, 'w') as file: 
+	    for token in tokens: 
+	    	file.write('%s\n' % token)
 	file.close()
 
 
+def print_freq(token_dict,filename):
+''' Prints the dictinary of the tokens/bigrams to a new txt file
+'''
+	# prints to a new line
+	count=0
+	with open(filename, 'w') as file: 	
+	    for key, value in token_dict.items(): 
+	        file.write('%s:%s\n' % (key, value))
+	        count+=1
+	file.close()
+
 
 # create tokens
-def tokenise(doc):
-	
-	with open('contractions.txt', 'r') as f:
-		contractions = f.read().split(",")
+def tokenise(doc, raw=False):
+''' This is our main tokeniser function.
+'''
+		
+	if (raw):
+		# build our tokenizer
+		tokenizer = Tokenizer(nlp.vocab)
+	else:
+		with open('contractions.txt', 'r') as f:
+			contractions = f.read().split(",")
 
-	find_abbreviations = r'''(?<=[\s\t\n])[A-Z][\.a-zA-Zéèàëôùç]*\.(?=[\s\t\n])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
+		find_abbreviations = r'''(?<=[\s\t\n])[A-Z][\.a-zA-Zéèàëôùç]*\.(?=[\s\t\n])''' # finds abbreviations like "St." and "P.H.D." by looking for words that start with capital letter and end with dot as those are probably abbreviations
 
-	find_abbreviations2 = r'''(?<=[\s\t\n])[a-zA-Zéèàëôùç\d]+\.[a-zA-Zéèàëôùç\.\d]+(?=[\s\t\n])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
+		find_abbreviations2 = r'''(?<=[\s\t\n])[a-zA-Zéèàëôùç\d]+\.[a-zA-Zéèàëôùç\.\d]+(?=[\s\t\n])''' #finds abbreviations like "i.e." or numbers like "10.19" by looking for words that contain at least one dot in the middle of them
 
-	find_numbers_with_commas = r'''\d+,[\d,\.]+''' # finds numbers with commas like "1,000,000.12"
-
-
-	# dictionary of special words that we dont want edited during tokenization
-	special_case_dict = {}
-
-	abbreviations = re.findall(find_abbreviations, doc)
-	# print(abbreviations)
-	for abb in abbreviations:
-		special_case_dict[abb] = [{ORTH: abb}]
-
-	abbreviations2 = re.findall(find_abbreviations2, doc)
-	# print(abbreviations2)
-	for abb in abbreviations2:
-		special_case_dict[abb] = [{ORTH: abb}]
-
-	comma_numbers = re.findall(find_numbers_with_commas, doc)
-	# print(comma_numbers)
-	for num in comma_numbers:
-		special_case_dict[num] = [{ORTH: num}]
-
-	for con in contractions:
-		#print(con)
-		special_case_dict[con] = [{ORTH: con}]
-		special_case_dict[con.capitalize()] = [{ORTH: con.capitalize()}]
-		special_case_dict[con.upper()] = [{ORTH: con.upper()}]
+		find_numbers_with_commas = r'''\d+,[\d,\.]+''' # finds numbers with commas like "1,000,000.12"
 
 
-	# Note that these next regex expressions will not impact our special words we added to dictioanry
+		# dictionary of special words that we dont want edited during tokenization
+		special_case_dict = {}
 
-	prefix_regex = re.compile(r'''^[{\[\("']''') # seperates words from punctuation marks: [ ( " ' that are located at the beginning of the word
+		abbreviations = re.findall(find_abbreviations, doc)
+		# print(abbreviations)
+		for abb in abbreviations:
+			special_case_dict[abb] = [{ORTH: abb}]
 
-	suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"';}&\-]$''') # seperates words from punctuation marks: ] ) : ? ! . " , ' ; that are located at the end of the word
+		abbreviations2 = re.findall(find_abbreviations2, doc)
+		# print(abbreviations2)
+		for abb in abbreviations2:
+			special_case_dict[abb] = [{ORTH: abb}]
 
-	infix_regex = re.compile(r'''(?<=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])[\-'\\\:\(\/&;](?=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])|(?<=[\d])['](?=[a-zA-Zéèàëôùç])|(?<=[a-zA-Z\[\]\(\)\*.])'-(?=[a-zA-Z\[\]\(\)\*.])''') # splits words in two when seeing - ' \ : ( ) / & ;  between two letters
+		comma_numbers = re.findall(find_numbers_with_commas, doc)
+		# print(comma_numbers)
+		for num in comma_numbers:
+			special_case_dict[num] = [{ORTH: num}]
 
-	http_catcher = re.compile(r'''https:[^\s\t\n]+''') # catches URLs that start with https:
+		for con in contractions:
+			#print(con)
+			special_case_dict[con] = [{ORTH: con}]
+			special_case_dict[con.capitalize()] = [{ORTH: con.capitalize()}]
+			special_case_dict[con.upper()] = [{ORTH: con.upper()}]
 
-	# build our tokenizer
-	tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, infix_finditer= infix_regex.finditer, suffix_search=suffix_regex.search, url_match=http_catcher.search)
+
+		# Note that these next regex expressions will not impact our special words we added to dictioanry
+
+		prefix_regex = re.compile(r'''^[{\[\("']''') # seperates words from punctuation marks: [ ( " ' that are located at the beginning of the word
+
+		suffix_regex = re.compile(r'''[\]\)\:\?\!\:\.,"';}&\-]$''') # seperates words from punctuation marks: ] ) : ? ! . " , ' ; that are located at the end of the word
+
+		infix_regex = re.compile(r'''(?<=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])[\-'\\\:\(\/&;](?=[a-zA-Zéèàëôùç\[\]\(\)\*.\$])|(?<=[\d])['](?=[a-zA-Zéèàëôùç])|(?<=[a-zA-Z\[\]\(\)\*.])'-(?=[a-zA-Z\[\]\(\)\*.])''') # splits words in two when seeing - ' \ : ( ) / & ;  between two letters
+
+		http_catcher = re.compile(r'''https:[^\s\t\n]+''') # catches URLs that start with https:
+
+		# build our tokenizer
+		tokenizer = Tokenizer(nlp.vocab, rules = special_case_dict, prefix_search = prefix_regex.search, infix_finditer= infix_regex.finditer, suffix_search=suffix_regex.search, url_match=http_catcher.search)
+
+
 
 	# tokenize document
 	doc = tokenizer(doc)
-
 	tokens = [token.text for token in doc]
 		
 	return tokens
+z
+def remove_punctuations(tokens):
+''' Removes the empty tokens or the tokens that consists of punctuation or symbols. Returns the new enhanced list of tokens.
+'''
+	# list of all the symbols and punctuations 
+	punctuation = '''!"#$%&\'-()...***...…***…*****+,.///:;<=>?@[\\]^_`—{|}·•\'\'●§§§~\n\n\n\n\n\n\n\n\t\t\t\t\t\t\t\s\s\s\s\s\s\s\s\s     
+
+
+
+
+
+
+
+
+
+
+
+  '''
+	tokens_nopunc=[]
+	for token in tokens:
+		if (token not in punctuation) and (token.strip()!=""):
+			tokens_nopunc.append(token.strip())
+	return tokens_nopunc
+
 
 def remove_stopwords(tokens):
+''' Creates a list with all the stopwords from the given text file.
+	Removes the tokens that consists of stopwords. 
+	Returns the new enhanced list of tokens.
+'''
 	with open('stopwords.txt', 'r') as f:
 		stop_words = [line.strip() for line in f]
 
 	tokens_nostop=[]
 	for token in tokens:
-		# token = token.lower()
-
+		
 		if token not in stop_words:
 			tokens_nostop.append(token)
 
@@ -179,25 +191,21 @@ def remove_stopwords(tokens):
 
 
 def compute_bigrams(tokens):
-	# bigrams = [b for l in tokens for b in zip(l,l)]
+''' Returns a list of tuples created with every 2 consecutive words in the list of tokens.
+'''
 	bigrams=[]
 	n=len(tokens)
-	print("Bigrams are:\n")
+	# print("Bigrams are:\n")
 	for i in range(n-1):
 		bigram=(tokens[i],tokens[i+1])
 		bigrams.append(bigram)
 	# print(bigrams)
 	return bigrams
 
-	# bigrams_without_stopwords = [(a,b) for a,b in nltk.bigrams(brown.words(categories="romance")) if a not in stopwords.words('english') and b not in stopwords.words('english')]
-	# bigrams_without_stopwords_fd = nltk.FreqDist(bigrams_without_stopwords)
-	# print(bigrams_without_stopwords_fd.most_common(50))
 
-#FIX THIS
 def bigram_frequency(bigrams):
-
-	# u_tokens=get_unique_tokens(tokens)
-	# bigram_dict=dict.fromkeys(bigrams,0)
+'''
+'''
 	bigram_dict={}
 	for bigram in bigrams:
 		# bigram_dict[bigram]+=1
@@ -213,78 +221,100 @@ def sort_bigram_frequencies(bigram_dict):
 
 	return bigram_dict_sorted
 
-def test_process_corpus(file_string, raw=False,lower=False, exclude_stopwords=True):
-# raw=True then tokens are not modified
-# exclude_stopwords=True then punctuations and stopwords are removed else only punctuations are removed
 
-	# Part 1
-	# b)
-	# tokens = tokenise1(file_string)
 
-	if (raw):
-		tokens = tokenise1(file_string)
-	else:
-		tokens = tokenise(file_string)
+def process_corpus(file_string):
+'''
+'''
 
-	if (exclude_stopwords):
-		tokens=remove_stopwords(tokens)
 
-	
-	# start_time = time.time()
-
-	token_dict=word_count(tokens,lower)
+	####################
+	# process raw
+	####################
+	raw=True
+	lower=True
+	tokens = tokenise(file_string,raw) # word tokenizer
+	if (lower):
+		tokens=lowercase(tokens)	# lowercasing the tokens
+	token_dict=word_count(tokens)	# 
 	sorted_freq=sort_frequencies(token_dict)
-	print_results(sorted_freq)
-	# print("--- %s seconds ---" % (time.time() - start_time))
 
-	# unique_tokens____2=len(token_dict)
-	# n_unique_tokens_in_the_corpus____2="# unique tokens in the corpus: "+str(unique_tokens____2)+""
-	# print("\n","# unique tokens in the corpus: ",n_unique_tokens_in_the_corpus____2)
+	print_tokens(tokens,"outputs.txt")
+	print_freq(sorted_freq,"tokens.txt")
+	title="Raw tokens"
+	islowercase="lower case before processing: "+str(lower)
 	n_unique_tokens=len(token_dict)
 	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
 	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
 	type_token_ratio="# of types (unique tokens) / token ratio: "+str(len(tokens)/n_unique_tokens)
-	print("\n",n_unique_tokens_in_the_corpus)
+	n_tokens_appeared_once=str(appeard_n_times(sorted_freq,1))+" tokens appeared only once in the corpus."
 
-	count_one=0
-	for once in sorted_freq.values():
-		if once==1:
-			count_one+=1
-	n_tokens_appeared_once=str(count_one)+" tokens appeared only once in the corpus."
+	results = io.open("Report_results.txt", 'w')
+	results.write(f'{title}\n{islowercase}\n{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
+	results.close()
+
+	####################
+	# no punctuation
+	####################
+	raw=False
+	lower=True
+	tokens = tokenise(file_string)
+	if (lower):
+		tokens=lowercase(tokens)
+	tokens=remove_punctuations(tokens)
+	token_dict=word_count(tokens,lower)
+	sorted_freq=sort_frequencies(token_dict)
 	
+
+	print_tokens(tokens,"outputs_enhanced_no_punct.txt")
+	print_freq(sorted_freq,"tokens_enhanced_no_punct.txt")
+	title="\n\nPunctuation excluded"
+	islowercase="lower case before processing: "+str(lower)
+	n_unique_tokens=len(token_dict)
+	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
+	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
+	type_token_ratio="(\"lexical diversity\", # of types (unique tokens) / token ratio : "+str(len(tokens)/n_unique_tokens)
+	n_tokens_appeared_once=str(appeard_n_times(sorted_freq,1))+" tokens appeared only once in the corpus."
+
+	results = io.open("Report_results.txt", 'a')
+	results.write(f'{title}\n{islowercase}\n{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
+	results.close()
+
+	####################
+	# no punctuation, no stopwords
+	####################
+	# raw=False
+	lower=True
+	tokens = tokenise(file_string)
+	if (lower):
+		tokens=lowercase(tokens)
+	tokens=remove_punctuations(tokens)
+	tokens=remove_stopwords(tokens)
+	token_dict=word_count(tokens,lower)
+	sorted_freq=sort_frequencies(token_dict)
+
 	bigrams=compute_bigrams(tokens)
 	bigram_dict=bigram_frequency(bigrams)
-	# print("Bigram frequencies are:\n",bigram_dict)
-	sorted_bigram_dict=sort_frequencies(bigram_dict)
-	# print("\n\n\n\nSORTED bigram frequencies are:\n",sorted_bigram_dict)
-
-	if (raw):
-		filename='Report_results_raw.txt'
-		results = io.open(filename, 'w')
-		results.write(f'{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
-		results.close()
-	else:
-		if (exclude_stopwords):
-			filename='Report_results_no_stopwords.txt'
-			results = io.open(filename, 'w')
-			results.write(f'{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
-			results.close()
-		else:
-			filename='Report_results_no_punctuation.txt'
-			results = io.open(filename, 'w')
-			results.write(f'{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
-			results.close()
-
-
-
-
+	# bigram_dict=word_count(bigrams)
 	
+	sorted_bigram_dict=sort_frequencies(bigram_dict)
 
-# test_process_corpus(file_string,raw=True,exclude_stopwords=False)
-# test_process_corpus(file_string,exclude_stopwords=False)
-# test_process_corpus(file_string)
-test_process_corpus(file_string, lower=True)
+	print_tokens(tokens,"outputs_enhanced_no_punct_stopw.txt")
+	print_freq(sorted_freq,"tokens_enhanced_no_punct_stopw.txt")
+	print_freq(sorted_bigram_dict,"bigrams.txt")
+	title="\n\nPunctuation AND Stopwords excluded"
+	islowercase="lower case before processing: "+str(lower)
+	n_unique_tokens=len(token_dict)
+	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
+	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
+	type_token_ratio="\"lexical density\", # of types (unique tokens) / token ratio: "+str(len(tokens)/n_unique_tokens)
+	n_tokens_appeared_once=str(appeard_n_times(sorted_freq,1))+" tokens appeared only once in the corpus."
+
+	results = io.open("Report_results.txt", 'a')
+	results.write(f'{title}\n{islowercase}\n{n_tokens_in_the_corpus}\n{n_unique_tokens_in_the_corpus}\n{type_token_ratio}\n{n_tokens_appeared_once}\n')
+	results.close()
 
 
+process_corpus(file_string)
 
 
