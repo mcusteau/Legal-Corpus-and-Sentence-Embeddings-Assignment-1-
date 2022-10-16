@@ -234,7 +234,7 @@ def process_corpus(file_string):
 	n_unique_tokens=len(token_dict)
 	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
 	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
-	type_token_ratio="# of types (unique tokens) / token ratio: "+str(len(tokens)/n_unique_tokens)
+	type_token_ratio="# of types (unique tokens) / token ratio: "+str(n_unique_tokens/len(tokens))
 	n_tokens_appeared_once=str(appeard_n_times(sorted_freq,1))+" tokens appeared only once in the corpus."
 
 	results = io.open("Report_results.txt", 'w')
@@ -264,7 +264,7 @@ def process_corpus(file_string):
 	n_unique_tokens=len(token_dict)
 	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
 	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
-	type_token_ratio="(\"lexical diversity\", # of types (unique tokens) / token ratio : "+str(len(tokens)/n_unique_tokens)
+	type_token_ratio="(\"lexical diversity\", # of types (unique tokens) / token ratio : "+str(n_unique_tokens/len(tokens))
 	n_tokens_appeared_once=str(appeard_n_times(sorted_freq,1))+" tokens appeared only once in the corpus."
 
 	results = io.open("Report_results.txt", 'a')
@@ -300,7 +300,7 @@ def process_corpus(file_string):
 	n_unique_tokens=len(token_dict)
 	n_tokens_in_the_corpus="# of tokens in the corpus: "+str(len(tokens))
 	n_unique_tokens_in_the_corpus="# unique tokens in the corpus: "+str(n_unique_tokens)
-	type_token_ratio="\"lexical density\", # of types (unique tokens) / token ratio: "+str(len(tokens)/n_unique_tokens)
+	type_token_ratio="\"lexical density\", # of types (unique tokens) / token ratio: "+str(n_unique_tokens/len(tokens))
 	n_tokens_appeared_once=str(appeard_n_times(sorted_freq,1))+" tokens appeared only once in the corpus."
 
 	results = io.open("Report_results.txt", 'a')
