@@ -1,3 +1,7 @@
+Michel Custeau,  8658589
+Beril Borali, 300036112
+
+
 PART 1:
 
 For the necessary libraries, please see the "requirements.txt" file. The data folder needs to be named as "CUAD_v1" and be in the main directory . You need Python 3.8 to run the program. For running the program:
