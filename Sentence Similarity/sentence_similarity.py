@@ -15,7 +15,7 @@ from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from models import InferSent
 
-
+nltk.download('punkt')
 
 nlp_sent = spacy.load('en_core_web_sm') 
 datasets = ["answer-answer", "headlines", "plagiarism", "postediting", "question-question"]
@@ -113,7 +113,7 @@ def InferSent_preprocess(sentences, datasets):
 			vocab_data = vocab_data+[sentences[dataset_num][i][0], sentences[dataset_num][i][1]]
 
 	infersent.build_vocab(vocab_data)
-	print(vocab_data)
+	
 	return infersent
 
 def UniversalSentenceEncoder_preprocess():
